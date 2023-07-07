@@ -1,4 +1,4 @@
-from . import config
+import config
 import numpy as np
 rnd = np.random
 SERVICE_SAMPLE = config.SERVICE_SAMPLE  # Sample services

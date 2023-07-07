@@ -1,4 +1,9 @@
 # This file includes some examples showing how to instantiate the ENVIRONMENT class, get its state, update it, and reset the object.
+import sys
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR.replace('/test/main_environment.py', '')
+sys.path.append(os.path.dirname(SCRIPT_DIR))
 from Environment import Environment
 
 # Creating an environment instance:

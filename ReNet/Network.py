@@ -1,4 +1,4 @@
-from . import config
+import config
 import math
 import networkx as nx
 import matplotlib.pyplot as plt

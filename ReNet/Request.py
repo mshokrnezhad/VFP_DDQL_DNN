@@ -1,4 +1,4 @@
-from . import config
+import config
 import numpy as np
 rnd = np.random
 REQUEST_INIT = config.REQUEST_INIT  # Default configs

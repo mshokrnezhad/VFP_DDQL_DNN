@@ -1,7 +1,12 @@
 # This file includes some examples showing how to instantiate the REQUEST class and get its state.
-from request.Request import Request
-from service.Service import Service
-from network.Network import Network
+import sys
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR.replace('/test/main_environment.py', '')
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+from Request import Request
+from Service import Service
+from Network import Network
 net_obj = Network({"SAMPLE": "NET1"})
 srv_obj = Service({"SAMPLE": "SRVSET1"})
 

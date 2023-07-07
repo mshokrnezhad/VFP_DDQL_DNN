@@ -1,5 +1,10 @@
 # This file includes some examples showing how to instantiate the NETWORK class, get its state, and update its state.
-from network.Network import Network
+import sys
+import os
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR.replace('/test/main_environment.py', '')
+sys.path.append(os.path.dirname(SCRIPT_DIR))
+from Network import Network
 
 # Creating a network instance using a predefined sample:
 net_obj = Network({"SAMPLE": "NET1"})

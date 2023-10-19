@@ -27,8 +27,8 @@ class Agent(object):
         self.ACTION_SPACE = [i for i in range(self.NUM_ACTIONS)]
         self.learning_counter = 0
         self.memory = Memory(MAX_SIZE=self.MEMORY_SIZE, INPUT_SHAPE=self.INPUT_SHAPE)
-        self.q_eval = DNN(self.generate_q_eval_inputs("_q_eval"))
-        self.q_next = DNN(self.generate_q_eval_inputs("_q_next"))
+        self.q_eval = DNN(self.generate_q_inputs("_q_eval"))
+        self.q_next = DNN(self.generate_q_inputs("_q_next"))
 
     def generate_q_inputs(self, local_name):
         NUM_LAYERS = 4

@@ -17,7 +17,7 @@ NETWORK_INIT = {  # The NETWORK class's default configuration. If you do not pas
     "LINK_COST_SIGMA": 5,  # Representing the standard deviation of LINK_COST supposing it has a normal distribution.
     "BURST_SIZE_LIMIT": 200,
     "PACKET_SIZE": 1,
-    "NUM_PATHS_UB": 2,  # Representing the number of paths considered betweeen each pair of nodes.
+    "NUM_PATHS_UB": 1,  # Representing the number of paths considered betweeen each pair of nodes.
     "LINK_LENGTH_UB": 5,  # Representing the maximum length of paths. In other words, paths longer than LINK_LENGTH_UB will not be considered in the allocation procedure.
     "SAMPLE": "NET2"  # Representing the sample code. It should be one of the objects of NETWORK_SAMPLE.
 }

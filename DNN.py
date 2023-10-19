@@ -14,14 +14,14 @@ class DNN(nn.Module):
         # Defining base variables
         self.CHECKPOINT_DIR = self.INPUT["CHECKPOINT_DIR"]
         self.CHECKPOINT_FILE = os.path.join(self.CHECKPOINT_DIR, self.INPUT["NAME"])
-        self.NUM_LAYERS: self.INPUT["NUM_LAYERS"]
-        self.SIZE_LAYERS: self.INPUT["SIZE_LAYERS"]
+        self.NUM_LAYERS = self.INPUT["NUM_LAYERS"]
+        self.SIZE_LAYERS = self.INPUT["SIZE_LAYERS"]
         self.fc = self.generate_layers_v01()
         self.optimizer = opt.Adam(self.parameters(), lr=self.INPUT["LR"])
         self.criterion = nn.MSELoss()
 
     def generate_layers_v01(self):
-        fc = []
+        fc = nn.ModuleList()
 
         for l in range(self.NUM_LAYERS+1):
             fc.append(nn.Linear(self.SIZE_LAYERS[l], self.SIZE_LAYERS[l+1]))

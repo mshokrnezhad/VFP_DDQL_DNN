@@ -49,7 +49,7 @@ class Network:
         self.LINK_COSTS, self.LINK_COSTS_MATRIX = self.initialize_link_costs()
         self.LINK_DELAYS, self.LINK_DELAYS_MATRIX = self.initialize_link_delays()
         self.FIRST_TIER_NODES = self.get_first_tier_nodes()
-        self.NUM_PATHS, self.PATHS_LIST, self.PATHS_PER_HEAD, self.PATHS_PER_TAIL = self.find_all_paths()  # PATHS_PER_HEAD[i] denotes paths that begin at node i, PATHS_PER_TAIL[i] denotes paths that end at node i
+        self.NUM_PATHS, self.PATHS_LIST = self.find_all_paths()  # PATHS_PER_HEAD[i] denotes paths that begin at node i, PATHS_PER_TAIL[i] denotes paths that end at node i
         self.LINKS_PATHS_MATRIX = self.match_paths_to_links()
 
     def initialize_coordinates(self):
@@ -301,9 +301,6 @@ class Network:
 
     def find_all_paths(self):
         paths_list = []
-        NUM_PATHS_PER_NODE = (self.NUM_NODES - 1) * self.NUM_PATHS_UB
-        paths_per_head = [range(v * NUM_PATHS_PER_NODE, (v + 1) * NUM_PATHS_PER_NODE) for v in self.NODES]
-        paths_per_tail = [[] for v in self.NODES]
 
         for i in self.NODES:
             for j in self.NODES:
@@ -326,17 +323,7 @@ class Network:
 
         num_paths = len(paths_list)
 
-        for v1 in self.NODES:
-            for v2 in self.NODES:
-                if v1 != v2:
-                    if v2 < v1:
-                        for p in range((v2 * NUM_PATHS_PER_NODE) + ((v1 - 1) * self.NUM_PATHS_UB), (v2 * NUM_PATHS_PER_NODE) + (v1 * self.NUM_PATHS_UB)):
-                            paths_per_tail[v1].append(p)
-                    if v2 > v1:
-                        for p in range((v2 * NUM_PATHS_PER_NODE) + (v1 * self.NUM_PATHS_UB), (v2 * NUM_PATHS_PER_NODE) + ((v1 + 1) * self.NUM_PATHS_UB)):
-                            paths_per_tail[v1].append(p)
-
-        return num_paths, paths_list, paths_per_head, paths_per_tail
+        return num_paths, paths_list
 
     def match_paths_to_links(self):
         links_paths_matrix = np.zeros((self.NUM_LINKS, self.NUM_PATHS)).astype(int)

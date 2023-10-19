@@ -319,9 +319,10 @@ class Network:
                         path_costs[p] = cost
 
                     for p in range(self.NUM_PATHS_UB):
-                        min_index = path_costs.argmin()
-                        paths_list.append(new_paths[min_index])
-                        path_costs[min_index] = 1000000
+                        if(len(path_costs) > 0):
+                            min_index = path_costs.argmin()
+                            paths_list.append(new_paths[min_index])
+                            path_costs[min_index] = 1000000
 
         num_paths = len(paths_list)
 

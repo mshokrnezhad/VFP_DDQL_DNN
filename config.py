@@ -1,6 +1,6 @@
 NETWORK_INIT = {  # The NETWORK class's default configuration. If you do not pass any attribute, it will default to the value defined here.
     "SEED": 4,
-    "NUM_NODES": 6,
+    "NUM_NODES": 3,
     "NUM_PRIORITY_LEVELS": 1,
     "NUM_TIERS": 3,
     "TIER_HEIGHT": 100,
@@ -19,7 +19,7 @@ NETWORK_INIT = {  # The NETWORK class's default configuration. If you do not pas
     "PACKET_SIZE": 1,
     "NUM_PATHS_UB": 2,  # Representing the number of paths considered betweeen each pair of nodes.
     "LINK_LENGTH_UB": 5,  # Representing the maximum length of paths. In other words, paths longer than LINK_LENGTH_UB will not be considered in the allocation procedure.
-    "SAMPLE": ""  # Representing the sample code. It should be one of the objects of NETWORK_SAMPLE.
+    "SAMPLE": "NET2"  # Representing the sample code. It should be one of the objects of NETWORK_SAMPLE.
 }
 
 NETWORK_SAMPLE = {
@@ -27,6 +27,11 @@ NETWORK_SAMPLE = {
         "X_LOCS": [5, 10, 45, 35, 65, 70],
         "Y_LOCS": [55, 25, 65, 20, 55, 10],
         "LINKS_LIST": [(0, 1), (1, 0), (0, 2), (2, 0), (0, 3), (3, 0), (1, 3), (3, 1), (2, 3), (3, 2), (2, 4), (4, 2), (3, 4), (4, 3), (3, 5), (5, 3), (4, 5), (5, 4)]
+    },
+    "NET2": {
+        "X_LOCS": [5, 30, 65],
+        "Y_LOCS": [55, 25, 65],
+        "LINKS_LIST": [(0, 1), (1, 2)]
     }
 }
 
@@ -40,6 +45,16 @@ SERVICE_SAMPLE = {
         "BW_REQUIREMENTS_SIGMA": [1, 1, 1],  # Representing the standard deviation of BW_REQUIREMENT[s] for service s supposing it has a normal distribution.
         "DLY_REQUIREMENTS_MU": [10, 1, 100],  # Supposing that DLY_REQUIREMENT[s] for service s has a normal distribution, DLY_REQUIREMENT_MU[s] is the mean.
         "DLY_REQUIREMENTS_SIGMA": [1, 0, 1],  # Representing the standard deviation of DLY_REQUIREMENT[s] for service s supposing it has a normal distribution.
+    },
+    "SRVSET2": {
+        "NUM_SERVICES": 1,
+        "SEED": 4,
+        "DC_CAPACITY_REQUIREMENTS_MU": [8],
+        "DC_CAPACITY_REQUIREMENTS_SIGMA": [2],
+        "BW_REQUIREMENTS_MU": [3],
+        "BW_REQUIREMENTS_SIGMA": [1],
+        "DLY_REQUIREMENTS_MU": [10],
+        "DLY_REQUIREMENTS_SIGMA": [1],
     }
 }
 
@@ -58,4 +73,19 @@ REQUEST_SAMPLE = {  # Do you want some parameters to be set in a specific way? C
         "ENTRY_NODES": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "ASSIGNED_SERVICES": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     }
+}
+
+AGENT_INIT = {  # The NETWORK class's default configuration. If you do not pass any attribute, it will default to the value defined here.
+    "NUM_ACTIONS": 0,
+    "INPUT_SHAPE": 0,
+    "NAME": "",
+    "EPSILON": 1, # Epsilon is initialized for the epsilon-greedy technique.
+    "EPSILON_MIN": 0.05, # Setting the minimum bound for Epsilon.
+    "EPSILON_DEC": 5e-6, # Defining a reduction factor for Epsilon.
+    "GAMMA": 0.99, 
+    "LR": 0.0001, # defining the learning rate
+    "MEMORY_SIZE": 50000,  
+    "BATCH_SIZE": 32,  
+    "REPLACE_COUNTER": 1000,
+    "CHECKPOINT_DIR": 'models/'
 }

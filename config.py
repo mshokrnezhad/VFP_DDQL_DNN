@@ -10,7 +10,7 @@ NETWORK_INIT = {  # The NETWORK class's default configuration. If you do not pas
     "DC_CAPACITY_GROWTH_RATE": 100,  # The mean DC_CAPACITY of nodes in tier i+1 is DC_CAPACITY_GROWTH_RATE greater than that of nodes in tier i.
     "DC_COST_MU": 1000,  # Supposing that DC_COST has a normal distribution, DC_COST_MU is the mean.
     "DC_COST_SIGMA": 10,  # Representing the standard deviation of DC_COST supposing it has a normal distribution.
-    "DC_COST_DECREASE_RATE": 200,  # The mean DC_COST of nodes in tier i is DC_CAPACITY_GROWTH_RATE greater than that of nodes in tier i+1.
+    "DC_COST_DECREASE_RATE": 300,  # The mean DC_COST of nodes in tier i is DC_CAPACITY_GROWTH_RATE greater than that of nodes in tier i+1.
     "LINK_BW_MU": 250,  # Supposing that LINK_BW has a normal distribution, LINK_BW_MU is the mean.
     "LINK_BW_SIGMA": 50,  # Representing the standard deviation of LINK_BW supposing it has a normal distribution.
     "LINK_COST_MU": 20,  # Supposing that LINK_COST has a normal distribution, LINK_COST_MU is the mean. Note that LINK_COST dose not depend on the tier number of its nodes.
@@ -32,6 +32,12 @@ NETWORK_SAMPLE = {
         "X_LOCS": [5, 30, 65],
         "Y_LOCS": [55, 25, 65],
         "LINKS_LIST": [(0, 1), (1, 2)]
+    },
+    "NET3": {
+        "X_LOCS": [5, 30, 65],
+        "Y_LOCS": [55, 25, 65],
+        "LINKS_LIST": [(0, 1), (1, 2)],
+        "DC_CAPACITIES": [100, 200, 300]
     }
 }
 
@@ -49,19 +55,19 @@ SERVICE_SAMPLE = {
     "SRVSET2": {
         "NUM_SERVICES": 1,
         "SEED": 4,
-        "DC_CAPACITY_REQUIREMENTS_MU": [8],
-        "DC_CAPACITY_REQUIREMENTS_SIGMA": [2],
-        "BW_REQUIREMENTS_MU": [3],
-        "BW_REQUIREMENTS_SIGMA": [1],
+        "DC_CAPACITY_REQUIREMENTS_MU": [150],
+        "DC_CAPACITY_REQUIREMENTS_SIGMA": [0],
+        "BW_REQUIREMENTS_MU": [10],
+        "BW_REQUIREMENTS_SIGMA": [0],
         "DLY_REQUIREMENTS_MU": [10],
-        "DLY_REQUIREMENTS_SIGMA": [1],
+        "DLY_REQUIREMENTS_SIGMA": [0],
     }
 }
 
 REQUEST_INIT = {  # The REQUEST class's default configuration. If you do not pass optional attributes, they will default to the values defined here.
     "SRV_OBJ": "",  # MANDATORY. An object of the service class should be passed to this class to define service-related parameters and requirements.
     "NET_OBJ": "",  # MANDATORY. An object of the network class should be passed to this class to define ENTRY_NODES.
-    "NUM_REQUESTS": 10,
+    "NUM_REQUESTS": 1,
     "SEED": 4,
     "BURST_SIZE_MU": 2,  # Supposing that BURST_SIZE has a normal distribution, BURST_SIZE_MU is the mean.
     "BURST_SIZE_SIGMA": 1,  # Representing the standard deviation of BURST_SIZE supposing it has a normal distribution.
@@ -70,8 +76,8 @@ REQUEST_INIT = {  # The REQUEST class's default configuration. If you do not pas
 
 REQUEST_SAMPLE = {  # Do you want some parameters to be set in a specific way? Create a sample and send its code to INPUT.
     "REQ1": {
-        "ENTRY_NODES": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "ASSIGNED_SERVICES": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "ENTRY_NODES": [0],
+        "ASSIGNED_SERVICES": [0],
     }
 }
 
@@ -81,7 +87,7 @@ AGENT_INIT = {  # The NETWORK class's default configuration. If you do not pass 
     "NAME": "",
     "EPSILON": 1, # Epsilon is initialized for the epsilon-greedy technique.
     "EPSILON_MIN": 0.05, # Setting the minimum bound for Epsilon.
-    "EPSILON_DEC": 5e-6, # Defining a reduction factor for Epsilon.
+    "EPSILON_DEC": 5e-4, # Defining a reduction factor for Epsilon.
     "GAMMA": 0.99, 
     "LR": 0.0001, # defining the learning rate
     "MEMORY_SIZE": 50000,  

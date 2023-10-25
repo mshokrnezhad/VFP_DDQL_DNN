@@ -51,6 +51,8 @@ class Network:
         self.FIRST_TIER_NODES = self.get_first_tier_nodes()
         self.NUM_PATHS, self.PATHS_LIST = self.find_all_paths()  # PATHS_PER_HEAD[i] denotes paths that begin at node i, PATHS_PER_TAIL[i] denotes paths that end at node i
         self.LINKS_PATHS_MATRIX = self.match_paths_to_links()
+        self.MAX_COST_PER_TIER = self.find_max_cost_per_tier()
+        self.MIN_COST_PER_TIER = self.find_min_cost_per_tier()
 
     def initialize_coordinates(self):
         if self.SAMPLE == "":
@@ -63,12 +65,15 @@ class Network:
         return X_LOCS, Y_LOCS
 
     def initialize_dc_capacities(self):
-        mu = self.DC_CAPACITY_MU
-        sigma = self.DC_CAPACITY_SIGMA
-        rate = self.DC_CAPACITY_GROWTH_RATE
-        nodes_mu = [mu + (self.NODE_TIERS[i] * rate) for i in self.NODES]
+        if self.SAMPLE == "" or NETWORK_SAMPLE[self.SAMPLE]["DC_CAPACITIES"] == []:
+            mu = self.DC_CAPACITY_MU
+            sigma = self.DC_CAPACITY_SIGMA
+            rate = self.DC_CAPACITY_GROWTH_RATE
+            nodes_mu = [mu + (self.NODE_TIERS[i] * rate) for i in self.NODES]
 
-        dc_capacities = np.array([np.random.normal(nodes_mu[i], sigma, 1)[0].round(0).astype(int) for i in self.NODES])
+            dc_capacities = np.array([np.random.normal(nodes_mu[i], sigma, 1)[0].round(0).astype(int) for i in self.NODES])
+        else:
+            dc_capacities = np.array(NETWORK_SAMPLE[self.SAMPLE]["DC_CAPACITIES"])
 
         return dc_capacities
 
@@ -145,14 +150,27 @@ class Network:
 
         return link_bws, link_bws_matrix, link_bws_limit_per_priority, link_bws_cum_limit_per_priority
 
-    def update_link_bws(self, priority, path, bw_requirement):  # It updates LINK_BWS, LINK_BWS_MATRIX, and LINK_BWS_LIMIT_PER_PRIORITY after allocating a priority and a path to a request.
-        link_indexes = [i for i in range(self.NUM_LINKS) if self.LINKS_PATHS_MATRIX[i][path] == 1]
+    def update_link_bws(self, priority, _path, bw_requirement):  # It updates LINK_BWS, LINK_BWS_MATRIX, LINK_BWS_LIMIT_PER_PRIORITY, and LINK_BWS_CUM_LIMIT_PER_PRIORITY after allocating a priority and a path to a request.
+        if(_path != {}):
+            path = self.PATHS_LIST.index(_path)
+            link_indexes = [i for i in range(self.NUM_LINKS) if self.LINKS_PATHS_MATRIX[i][path] == 1]
 
-        for index in link_indexes:
-            (i, j) = self.LINKS_LIST[index]
-            self.LINK_BWS[index] -= bw_requirement
-            self.LINK_BWS_MATRIX[i, j] -= bw_requirement
-            self.LINK_BWS_LIMIT_PER_PRIORITY[index, priority] -= bw_requirement
+            for index in link_indexes:
+                (i, j) = self.LINKS_LIST[index]
+                self.LINK_BWS[index] -= bw_requirement
+                self.LINK_BWS_MATRIX[i, j] -= bw_requirement
+                self.LINK_BWS_LIMIT_PER_PRIORITY[index, priority] -= bw_requirement
+                
+                link_bws_cum_limit_per_priority = np.zeros((self.NUM_LINKS, self.NUM_PRIORITY_LEVELS + 1)).astype(int)
+                for (i, j) in self.LINKS_LIST:
+                    link_index = self.LINKS_LIST.index((i, j))
+                    array = []
+                    for n in self.PRIORITIES:
+                        array.append(self.LINK_BWS_LIMIT_PER_PRIORITY[link_index, n])
+                    for n in self.PRIORITIES:
+                        link_bws_cum_limit_per_priority[link_index, n] = np.array(array)[:n].sum()
+                        link_bws_cum_limit_per_priority[link_index, n] = np.array(array)[:n].sum()
+                self.LINK_BWS_CUM_LIMIT_PER_PRIORITY = link_bws_cum_limit_per_priority
 
     def initialize_link_costs(self):
         link_costs_matrix = np.zeros((self.NUM_NODES, self.NUM_NODES)).astype(int)
@@ -217,18 +235,22 @@ class Network:
 
     def update_state(self, action={}):  # It updates the network state after receiving an action from a request.
         node = action["node"] if "node" in action.keys() else ""
+        dc_capacity_requirement = action["dc_capacity_requirement"] if "dc_capacity_requirement" in action.keys() else ""
         priority = action["priority"] if "priority" in action.keys() else ""
+        burst_size = action["burst_size"] if "burst_size" in action.keys() else ""
+        bw_requirement = action["bw_requirement"] if "bw_requirement" in action.keys() else ""
         req_path = action["req_path"] if "req_path" in action.keys() else ""
         rpl_path = action["rpl_path"] if "rpl_path" in action.keys() else ""
 
         if node != "":
-            self.update_dc_capacities(node, action["dc_capacity_requirement"])
+            self.update_dc_capacities(node, dc_capacity_requirement)
         if priority != "":
-            self.update_burst_size_limit_per_priority(priority, action["burst_size"])
+            if burst_size != "":
+                self.update_burst_size_limit_per_priority(priority, burst_size)
             if req_path != "":
-                self.update_link_bws(priority, req_path, action["bw_requirement"])
+                self.update_link_bws(priority, req_path, bw_requirement)
             if rpl_path != "":
-                self.update_link_bws(priority, rpl_path, action["bw_requirement"])
+                self.update_link_bws(priority, rpl_path, bw_requirement)
 
     def get_tier_num(self, i):
         tier_num = 0
@@ -335,3 +357,59 @@ class Network:
                         links_paths_matrix[link_index][path_index] = 1
 
         return links_paths_matrix
+    
+    def find_max_cost_per_tier(self):
+        entry_nodes = self.get_first_tier_nodes()
+        costs = {}
+        for e in entry_nodes:
+            tiers_cost = {}
+            for t in range(self.NUM_TIERS):
+                nodes_cost = {}
+                for v in self.NODES:
+                    if self.get_tier_num(v) == t:
+                        c1 = 0
+                        for qp in self.PATHS_LIST:
+                            if qp[0] == e and qp[-1] == v:
+                                c2 = 0
+                                for l in np.where(self.LINKS_PATHS_MATRIX[:, qp] == 1)[0]:
+                                    c2 += self.LINK_COSTS[l]
+                                for pp in self.PATHS_LIST:
+                                    if pp[0] == v and pp[-1] == e:
+                                        c3 = 0
+                                        for l in np.where(self.LINKS_PATHS_MATRIX[:, pp] == 1)[0]:
+                                            c3 += self.LINK_COSTS[l]
+                                        if c2 + c3 > c1:
+                                            c1 = c2 + c3
+                        c1 += self.DC_COSTS[v]
+                        nodes_cost[v] = c1
+                tiers_cost[t] = max(nodes_cost.values())
+            costs[e] = tiers_cost
+        return costs
+
+    def find_min_cost_per_tier(self):
+        entry_nodes = self.get_first_tier_nodes()
+        costs = {}
+        for e in entry_nodes:
+            tiers_cost = {}
+            for t in range(self.NUM_TIERS):
+                nodes_cost = {}
+                for v in self.NODES:
+                    if self.get_tier_num(v) == t:
+                        c1 = 10e10
+                        for qp in self.PATHS_LIST:
+                            if qp[0] == e and qp[-1] == v:
+                                c2 = 0
+                                for l in np.where(self.LINKS_PATHS_MATRIX[:, qp] == 1)[0]:
+                                    c2 += self.LINK_COSTS[l]
+                                for pp in self.PATHS_LIST:
+                                    if pp[0] == v and pp[-1] == e:
+                                        c3 = 0
+                                        for l in np.where(self.LINKS_PATHS_MATRIX[:, pp] == 1)[0]:
+                                            c3 += self.LINK_COSTS[l]
+                                        if c2 + c3 < c1:
+                                            c1 = c2 + c3
+                        c1 = self.DC_COSTS[v] if c1 == 10e10 else c1 + self.DC_COSTS[v]
+                        nodes_cost[v] = c1
+                tiers_cost[t] = min(nodes_cost.values())
+            costs[e] = tiers_cost
+        return costs
